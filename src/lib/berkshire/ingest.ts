@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { embedMany } from "ai";
 import { MDocument } from "@mastra/rag";
-import { ollama } from "@/lib/ollama-provider";
+import { mistral } from "@/lib/mistral-provider";
 import { BERKSHIRE_VECTOR_INDEX_NAME, FIRST_LETTER_YEAR, LAST_LETTER_YEAR, LETTER_EMBEDDING_MODEL, LETTERS_DIRECTORY, REQUIRED_LETTER_YEARS } from "./config";
 import { extractPdfText } from "./pdf";
 import type { IngestedLetterSummary, IngestionSummary, ShareholderLetterFile } from "./types";
@@ -111,7 +111,7 @@ export async function ingestShareholderLetters({
         );
 
         const { embeddings } = await embedMany({
-          model: ollama.embedding(LETTER_EMBEDDING_MODEL),
+          model: mistral.embedding(LETTER_EMBEDDING_MODEL),
           values: chunkBatch.map((chunk) => chunk.text),
         });
 
