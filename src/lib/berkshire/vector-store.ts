@@ -1,7 +1,7 @@
 import { PgVector } from "@mastra/pg";
 
 import { getRequiredEnv } from "@/lib/env";
-import { OLLAMA_EMBEDDING_DIMENSION } from "@/lib/ollama-provider";
+import { MISTRAL_EMBEDDING_DIMENSION } from "@/lib/mistral-provider";
 import {
   BERKSHIRE_INDEX_TABLE_ID,
   BERKSHIRE_VECTOR_INDEX_NAME,
@@ -39,7 +39,7 @@ export async function ensureBerkshireVectorIndex({
     if (!hasIndex || recreate) {
       await vectorStore.createIndex({
         indexName: BERKSHIRE_VECTOR_INDEX_NAME,
-        dimension: OLLAMA_EMBEDDING_DIMENSION,
+        dimension: MISTRAL_EMBEDDING_DIMENSION,
         metric: "cosine",
         metadataIndexes: ["year", "source", "type"],
       });
