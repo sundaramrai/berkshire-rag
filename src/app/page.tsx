@@ -34,7 +34,7 @@ export default function Home() {
                 <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
                   Model
                 </p>
-                <p className="mt-2 text-sm font-semibold">OpenAI GPT-4o</p>
+                <p className="mt-2 text-sm font-semibold">Ollama Cloud</p>
               </div>
               <div className="rounded-2xl border border-amber-900/10 bg-amber-50/80 px-4 py-3">
                 <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
