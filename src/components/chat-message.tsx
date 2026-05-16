@@ -1,4 +1,5 @@
 import type { UIMessage } from "ai";
+import { Fragment } from "react";
 
 function extractMessageText(message: UIMessage) {
   const text =
@@ -28,6 +29,46 @@ function extractSources(message: UIMessage) {
   );
 }
 
+function renderInlineText(text: string) {
+  return text.split(/(\*\*.*?\*\*)/g).map((segment) => {
+    if (segment.startsWith("**") && segment.endsWith("**")) {
+      return <strong key={segment}>{segment.slice(2, -2)}</strong>;
+    }
+
+    return <Fragment key={segment}>{segment}</Fragment>;
+  });
+}
+
+function renderAssistantText(text: string) {
+  const blocks = text.trim().split(/\n{2,}/);
+
+  return blocks.map((block) => {
+    const lines = block.split("\n");
+    const isList = lines.every((line) => line.trim().startsWith("- "));
+
+    if (isList) {
+      return (
+        <ul key={block} className="list-disc space-y-1 pl-5">
+          {lines.map((line) => (
+            <li key={line}>{renderInlineText(line.replace(/^\s*-\s*/, ""))}</li>
+          ))}
+        </ul>
+      );
+    }
+
+    return (
+      <p key={block}>
+        {lines.map((line, lineIndex) => (
+          <Fragment key={`${line}-${lineIndex}`}>
+            {lineIndex > 0 ? <br /> : null}
+            {renderInlineText(line)}
+          </Fragment>
+        ))}
+      </p>
+    );
+  });
+}
+
 export function ChatMessage({
   message,
   isPending = false,
@@ -35,6 +76,15 @@ export function ChatMessage({
   const isUser = message.role === "user";
   const sources = extractSources(message);
   const text = extractMessageText(message);
+  let messageContent: React.ReactNode;
+
+  if (text) {
+    messageContent = isUser ? text : renderAssistantText(text);
+  } else if (isPending) {
+    messageContent = "Thinking...";
+  } else {
+    messageContent = "No text returned.";
+  }
 
   return (
     <article className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
@@ -50,8 +100,8 @@ export function ChatMessage({
           </span>
         </div>
 
-        <div className="whitespace-pre-wrap text-sm leading-6">
-          {text || (isPending ? "Thinking..." : "No text returned.")}
+        <div className="space-y-3 text-[15px] leading-7">
+          {messageContent}
         </div>
 
         {!isUser && sources.length > 0 ? (
