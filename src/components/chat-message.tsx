@@ -28,7 +28,10 @@ function extractSources(message: UIMessage) {
   );
 }
 
-export function ChatMessage({ message }: Readonly<{ message: UIMessage }>) {
+export function ChatMessage({
+  message,
+  isPending = false,
+}: Readonly<{ message: UIMessage; isPending?: boolean }>) {
   const isUser = message.role === "user";
   const sources = extractSources(message);
   const text = extractMessageText(message);
@@ -48,7 +51,7 @@ export function ChatMessage({ message }: Readonly<{ message: UIMessage }>) {
         </div>
 
         <div className="whitespace-pre-wrap text-sm leading-7">
-          {text || "No text returned."}
+          {text || (isPending ? "Thinking..." : "No text returned.")}
         </div>
 
         {!isUser && sources.length > 0 ? (
