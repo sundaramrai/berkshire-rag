@@ -113,8 +113,10 @@ function BerkshireChatRuntime({
           </div>
         ) : (
           <div className="space-y-5">
-            {messages.map((message) => (
-              <ChatMessage key={message.id} message={message} />
+            {messages.map((message, index) => (
+              <ChatMessage key={message.id} message={message}
+                isPending={isStreaming && message.role === "assistant" && index === messages.length - 1}
+              />
             ))}
 
             {isStreaming ? (
