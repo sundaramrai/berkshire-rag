@@ -1,5 +1,7 @@
 import type { UIMessage } from "ai";
-import { Fragment } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { getBerkshireLetterSourceLink, getBerkshireLetterYearsFromText } from "@/lib/berkshire/source-links";
 
 function extractMessageText(message: UIMessage) {
   const text =
@@ -29,64 +31,101 @@ function extractSources(message: UIMessage) {
   );
 }
 
-function createKeyedItems(values: string[]) {
-  const seen = new Map<string, number>();
-  let position = 0;
-
-  return values.map((value) => {
-    const count = seen.get(value) ?? 0;
-    seen.set(value, count + 1);
+function createDisplayedSources(message: UIMessage, text: string) {
+  const structuredSources = extractSources(message).map((source) => {
+    const label =
+      source.type === "source-document"
+        ? source.filename || source.title
+        : source.title || source.url;
 
     return {
-      key: `${value}:${count}`,
-      value,
-      isFirst: position++ === 0,
+      key: `${source.type}-${source.sourceId}`,
+      label,
+      href: getBerkshireLetterSourceLink(label),
     };
   });
+
+  if (structuredSources.some((source) => source.href)) {
+    return structuredSources;
+  }
+
+  return getBerkshireLetterYearsFromText(text).map((year) => ({
+    key: `year-${year}`,
+    label: `${year} letter`,
+    href: getBerkshireLetterSourceLink(year),
+  }));
 }
 
-function renderInlineText(text: string) {
-  const segments = createKeyedItems(text.split(/(\*\*.*?\*\*)/g));
-
-  return segments.map(({ key, value }) => {
-    if (value.startsWith("**") && value.endsWith("**")) {
-      return <strong key={key}>{value.slice(2, -2)}</strong>;
-    }
-
-    return <Fragment key={key}>{value}</Fragment>;
-  });
+function removeTrailingSourcesSection(text: string) {
+  return text
+    .replace(/\n+(?:\*\*)?Sources used:?(?:\*\*)?[\s\S]*$/i, "")
+    .trim();
 }
 
 function renderAssistantText(text: string) {
-  const blocks = createKeyedItems(text.trim().split(/\n{2,}/));
-
-  return blocks.map(({ key, value: block }) => {
-    const lines = createKeyedItems(block.split("\n"));
-    const isList = lines.every(({ value }) => value.trim().startsWith("- "));
-
-    if (isList) {
-      return (
-        <ul key={key} className="list-disc space-y-1 pl-5">
-          {lines.map(({ key: lineKey, value }) => (
-            <li key={lineKey}>
-              {renderInlineText(value.replace(/^\s*-\s*/, ""))}
-            </li>
-          ))}
-        </ul>
-      );
-    }
-
-    return (
-      <p key={key}>
-        {lines.map(({ key: lineKey, value, isFirst }) => (
-          <Fragment key={lineKey}>
-            {isFirst ? null : <br />}
-            {renderInlineText(value)}
-          </Fragment>
-        ))}
-      </p>
-    );
-  });
+  return (
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      components={{
+        a: ({ children, href }) =>
+          href ? (
+            <a
+              href={href}
+              target="_blank"
+              rel="noreferrer"
+              className="underline decoration-slate-300 underline-offset-4 transition hover:decoration-slate-500"
+            >
+              {children}
+            </a>
+          ) : (
+            <>{children}</>
+          ),
+        blockquote: ({ children }) => (
+          <blockquote className="border-l-2 border-slate-300 pl-4 text-slate-700">
+            {children}
+          </blockquote>
+        ),
+        code: ({ children }) => (
+          <code className="bg-slate-100 px-1 py-0.5 text-[0.92em] text-slate-800">
+            {children}
+          </code>
+        ),
+        h1: ({ children }) => <h1 className="text-xl font-semibold">{children}</h1>,
+        h2: ({ children }) => <h2 className="text-lg font-semibold">{children}</h2>,
+        h3: ({ children }) => <h3 className="text-base font-semibold">{children}</h3>,
+        ol: ({ children }) => <ol className="list-decimal space-y-1 pl-5">{children}</ol>,
+        p: ({ children }) => <p>{children}</p>,
+        pre: ({ children }) => (
+          <pre className="overflow-x-auto bg-slate-950 p-4 text-sm leading-6 text-slate-100">
+            {children}
+          </pre>
+        ),
+        table: ({ children }) => (
+          <div className="overflow-x-auto">
+            <table className="min-w-full border-collapse text-left text-sm leading-6">
+              {children}
+            </table>
+          </div>
+        ),
+        tbody: ({ children }) => <tbody>{children}</tbody>,
+        td: ({ children }) => (
+          <td className="border-b border-slate-100 px-3 py-2 align-top text-slate-700">
+            {children}
+          </td>
+        ),
+        th: ({ children }) => (
+          <th className="border-b border-slate-200 px-3 py-2 font-semibold text-slate-700">
+            {children}
+          </th>
+        ),
+        thead: ({ children }) => <thead>{children}</thead>,
+        tr: ({ children }) => <tr>{children}</tr>,
+        ul: ({ children }) => <ul className="list-disc space-y-1 pl-5">{children}</ul>,
+      }}
+    >
+      {text}
+    </ReactMarkdown>
+  );
 }
 
 export function ChatMessage({
@@ -94,12 +133,13 @@ export function ChatMessage({
   isPending = false,
 }: Readonly<{ message: UIMessage; isPending?: boolean }>) {
   const isUser = message.role === "user";
-  const sources = extractSources(message);
   const text = extractMessageText(message);
+  const sources = createDisplayedSources(message, text);
+  const displayText = !isUser && sources.length > 0 ? removeTrailingSourcesSection(text) : text;
   let messageContent: React.ReactNode;
 
-  if (text) {
-    messageContent = isUser ? text : renderAssistantText(text);
+  if (displayText) {
+    messageContent = isUser ? displayText : renderAssistantText(displayText);
   } else if (isPending) {
     messageContent = "Thinking...";
   } else {
@@ -130,16 +170,24 @@ export function ChatMessage({
               Sources
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
-              {sources.map((source) => {
-                const label =
-                  source.type === "source-document"
-                    ? source.filename || source.title
-                    : source.title || source.url;
+              {sources.map(({ key, label, href }) => {
+                const className =
+                  "border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-700";
 
-                return (
+                return href ? (
+                  <a
+                    key={key}
+                    href={href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={`${className} transition hover:border-slate-300 hover:bg-white hover:text-slate-950`}
+                  >
+                    {label}
+                  </a>
+                ) : (
                   <span
-                    key={`${source.type}-${source.sourceId}`}
-                    className="border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-700"
+                    key={key}
+                    className={className}
                   >
                     {label}
                   </span>
