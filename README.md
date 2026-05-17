@@ -2,6 +2,12 @@
 
 A clean, modular RAG application built for the Pazago Mastra assignment. It answers questions about Warren Buffett's investment philosophy using Berkshire Hathaway shareholder letters from 1977 through 2024.
 
+## Live Links
+
+- Web app: <https://berkshire-rag.vercel.app/>
+- Mastra Studio agents: <https://berkshire-rag-assignment.studio.mastra.cloud/agents>
+- Mastra Studio Berkshire agent chat: <https://berkshire-rag-assignment.studio.mastra.cloud/agents/berkshire-intelligence-agent/chat/new>
+
 ## Tech Stack
 
 - Next.js 16 with App Router
@@ -23,6 +29,16 @@ A clean, modular RAG application built for the Pazago Mastra assignment. It answ
 - GitHub Flavored Markdown rendering for tables, links, lists, and code blocks
 - Re-runnable ingestion that replaces chunks per source file
 - Docker-based local PostgreSQL setup
+
+## Architecture
+
+- Frontend: Next.js chat interface with streamed responses
+- Agent layer: Mastra agent with persistent conversational memory
+- Retrieval: Mastra vector query tool over Berkshire shareholder letters
+- Embeddings: Mistral `mistral-embed`
+- Vector storage: PostgreSQL with `pgvector`
+- Memory storage: PostgreSQL-backed Mastra memory
+- Ingestion: PDF parsing -> `MDocument` chunking -> embeddings -> pgvector upsert
 
 ## Project Structure
 
