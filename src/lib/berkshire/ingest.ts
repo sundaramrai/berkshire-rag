@@ -8,7 +8,15 @@ import { extractPdfText } from "./pdf";
 import type { IngestedLetterSummary, IngestionSummary, ShareholderLetterFile } from "./types";
 import { createBerkshireVectorStore, ensureBerkshireVectorIndex } from "./vector-store";
 
-const INGEST_BATCH_SIZE = Number(process.env.RAG_INGEST_BATCH_SIZE ?? 8);
+function getIngestBatchSize() {
+  const batchSize = Number(process.env.RAG_INGEST_BATCH_SIZE ?? 8);
+
+  if (!Number.isInteger(batchSize) || batchSize <= 0) {
+    throw new Error("RAG_INGEST_BATCH_SIZE must be a positive integer.");
+  }
+
+  return batchSize;
+}
 
 export function listShareholderLetterFiles(): ShareholderLetterFile[] {
   if (!fs.existsSync(LETTERS_DIRECTORY)) {
@@ -67,6 +75,7 @@ export async function ingestShareholderLetters({
 
   const vectorStore = createBerkshireVectorStore();
   const processedFiles: IngestedLetterSummary[] = [];
+  const ingestBatchSize = getIngestBatchSize();
 
   try {
     const letters = listShareholderLetterFiles();
@@ -94,7 +103,7 @@ export async function ingestShareholderLetters({
       });
 
       console.log(`  ${chunks.length} chunks generated.`);
-      const totalBatches = Math.ceil(chunks.length / INGEST_BATCH_SIZE);
+      const totalBatches = Math.ceil(chunks.length / ingestBatchSize);
 
       await vectorStore.deleteVectors({
         indexName: BERKSHIRE_VECTOR_INDEX_NAME,
@@ -103,9 +112,9 @@ export async function ingestShareholderLetters({
         },
       });
 
-      for (let start = 0; start < chunks.length; start += INGEST_BATCH_SIZE) {
-        const chunkBatch = chunks.slice(start, start + INGEST_BATCH_SIZE);
-        const batchNumber = Math.floor(start / INGEST_BATCH_SIZE) + 1;
+      for (let start = 0; start < chunks.length; start += ingestBatchSize) {
+        const chunkBatch = chunks.slice(start, start + ingestBatchSize);
+        const batchNumber = Math.floor(start / ingestBatchSize) + 1;
 
         console.log(
           `  Embedding batch ${batchNumber}/${totalBatches} (${chunkBatch.length} chunks)...`,
