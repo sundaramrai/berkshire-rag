@@ -29,39 +29,59 @@ function extractSources(message: UIMessage) {
   );
 }
 
+function createKeyedItems(values: string[]) {
+  const seen = new Map<string, number>();
+  let position = 0;
+
+  return values.map((value) => {
+    const count = seen.get(value) ?? 0;
+    seen.set(value, count + 1);
+
+    return {
+      key: `${value}:${count}`,
+      value,
+      isFirst: position++ === 0,
+    };
+  });
+}
+
 function renderInlineText(text: string) {
-  return text.split(/(\*\*.*?\*\*)/g).map((segment) => {
-    if (segment.startsWith("**") && segment.endsWith("**")) {
-      return <strong key={segment}>{segment.slice(2, -2)}</strong>;
+  const segments = createKeyedItems(text.split(/(\*\*.*?\*\*)/g));
+
+  return segments.map(({ key, value }) => {
+    if (value.startsWith("**") && value.endsWith("**")) {
+      return <strong key={key}>{value.slice(2, -2)}</strong>;
     }
 
-    return <Fragment key={segment}>{segment}</Fragment>;
+    return <Fragment key={key}>{value}</Fragment>;
   });
 }
 
 function renderAssistantText(text: string) {
-  const blocks = text.trim().split(/\n{2,}/);
+  const blocks = createKeyedItems(text.trim().split(/\n{2,}/));
 
-  return blocks.map((block) => {
-    const lines = block.split("\n");
-    const isList = lines.every((line) => line.trim().startsWith("- "));
+  return blocks.map(({ key, value: block }) => {
+    const lines = createKeyedItems(block.split("\n"));
+    const isList = lines.every(({ value }) => value.trim().startsWith("- "));
 
     if (isList) {
       return (
-        <ul key={block} className="list-disc space-y-1 pl-5">
-          {lines.map((line) => (
-            <li key={line}>{renderInlineText(line.replace(/^\s*-\s*/, ""))}</li>
+        <ul key={key} className="list-disc space-y-1 pl-5">
+          {lines.map(({ key: lineKey, value }) => (
+            <li key={lineKey}>
+              {renderInlineText(value.replace(/^\s*-\s*/, ""))}
+            </li>
           ))}
         </ul>
       );
     }
 
     return (
-      <p key={block}>
-        {lines.map((line, lineIndex) => (
-          <Fragment key={`${line}-${lineIndex}`}>
-            {lineIndex > 0 ? <br /> : null}
-            {renderInlineText(line)}
+      <p key={key}>
+        {lines.map(({ key: lineKey, value, isFirst }) => (
+          <Fragment key={lineKey}>
+            {isFirst ? null : <br />}
+            {renderInlineText(value)}
           </Fragment>
         ))}
       </p>
