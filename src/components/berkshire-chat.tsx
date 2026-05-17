@@ -4,7 +4,7 @@ import { DefaultChatTransport } from "ai";
 import { useChat } from "@ai-sdk/react";
 import { startTransition, useEffect, useRef, useState } from "react";
 import { DEFAULT_CHAT_RESOURCE_ID, SAMPLE_QUESTIONS } from "@/lib/berkshire/config";
-import { createChatSession, loadStoredChatSession, persistChatSession, resetStoredChatSession, type StoredChatSession } from "@/lib/chat-storage";
+import { createChatSession, loadStoredChatSession, persistChatSession, type StoredChatSession } from "@/lib/chat-storage";
 import { ChatMessage } from "./chat-message";
 
 function BerkshireChatRuntime({
@@ -59,7 +59,7 @@ function BerkshireChatRuntime({
     setMessages([]);
 
     const nextSession = createChatSession();
-    resetStoredChatSession(nextSession);
+    persistChatSession(nextSession);
 
     startTransition(() => {
       onResetSession(nextSession);
