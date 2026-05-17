@@ -41,7 +41,7 @@ export function loadStoredChatSession(): StoredChatSession {
       };
     }
   } catch {
-    return createChatSession();
+    // Ignore malformed local storage and start a clean thread.
   }
 
   return createChatSession();
@@ -56,10 +56,5 @@ export function persistChatSession(session: StoredChatSession) {
 }
 
 export function resetStoredChatSession(session: StoredChatSession) {
-  if (globalThis.window === undefined) {
-    return;
-  }
-
-  globalThis.window.localStorage.removeItem(CHAT_STORAGE_KEY);
   persistChatSession(session);
 }
