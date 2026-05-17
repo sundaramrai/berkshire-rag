@@ -2,7 +2,7 @@
 
 import { DefaultChatTransport } from "ai";
 import { useChat } from "@ai-sdk/react";
-import { startTransition, useEffect, useState } from "react";
+import { startTransition, useEffect, useRef, useState } from "react";
 import { DEFAULT_CHAT_RESOURCE_ID, SAMPLE_QUESTIONS } from "@/lib/berkshire/config";
 import { createChatSession, loadStoredChatSession, persistChatSession, resetStoredChatSession, type StoredChatSession } from "@/lib/chat-storage";
 import { ChatMessage } from "./chat-message";
@@ -15,6 +15,7 @@ function BerkshireChatRuntime({
   onResetSession: (nextSession: StoredChatSession) => void;
 }>) {
   const [input, setInput] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { messages, sendMessage, error, status, stop, setMessages } = useChat({
     id: initialSession.threadId,
@@ -38,6 +39,10 @@ function BerkshireChatRuntime({
       messages,
     });
   }, [initialSession.threadId, messages]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, status]);
 
   async function submitPrompt(prompt: string) {
     const trimmed = prompt.trim();
@@ -126,6 +131,8 @@ function BerkshireChatRuntime({
                 Searching the letters...
               </div>
             ) : null}
+
+            <div ref={messagesEndRef} />
           </div>
         )}
       </div>
@@ -145,6 +152,12 @@ function BerkshireChatRuntime({
             id="chat-input"
             value={input}
             onChange={(event) => setInput(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                void submitPrompt(input);
+              }
+            }}
             placeholder="Ask a question about Buffett or Berkshire..."
             className="min-h-24 w-full resize-none border border-slate-300 bg-white px-4 py-3 text-sm leading-6 text-slate-900 outline-none transition focus:border-slate-500"
           />
