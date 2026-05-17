@@ -6,11 +6,10 @@ A clean, modular RAG application built for the Pazago Mastra assignment. It answ
 
 - Next.js 16 with App Router
 - TypeScript
-- Mastra 1.34
+- Mastra 1.35
 - Ollama Cloud `gpt-oss:20b-cloud` for response generation
 - Mistral `mistral-embed` for embeddings
-- PostgreSQL + `pgvector` for vector search
-- PostgreSQL for vector search and Mastra memory persistence
+- PostgreSQL + `pgvector` for vector search and Mastra memory persistence
 - AI SDK v6 for streaming chat UX
 - `pdf-parse@1.1.4` for PDF text extraction
 
@@ -20,7 +19,8 @@ A clean, modular RAG application built for the Pazago Mastra assignment. It answ
 - pgvector-backed retrieval with metadata filtering
 - `MDocument` chunking pipeline for PDF ingestion
 - Persistent thread memory via Mastra `Memory`
-- Streaming chat UI with source rendering
+- Streaming chat UI with clickable source links
+- GitHub Flavored Markdown rendering for tables, links, lists, and code blocks
 - Re-runnable ingestion that replaces chunks per source file
 - Docker-based local PostgreSQL setup
 
@@ -47,6 +47,7 @@ src/
 |       +-- config.ts
 |       +-- ingest.ts
 |       +-- pdf.ts
+|       +-- source-links.ts
 |       +-- types.ts
 |       +-- vector-store.ts
 +-- mastra/
@@ -142,6 +143,11 @@ npm run dev:studio
 ```
 
 Mastra Studio runs at `http://localhost:4111`.
+
+Deployed Mastra Studio:
+
+- Agents: <https://berkshire-rag-assignment.studio.mastra.cloud/agents>
+- Berkshire agent chat: <https://berkshire-rag-assignment.studio.mastra.cloud/agents/berkshire-intelligence-agent/chat/new>
 
 Terminal 2:
 
@@ -261,7 +267,7 @@ Verify that:
 
 - answers cite the relevant year
 - the agent uses earlier context for follow-up questions
-- sources appear in the frontend
+- clickable source chips appear in the frontend
 - retrieval remains grounded in the letters
 
 ## Notes on Design Choices
@@ -271,6 +277,7 @@ Verify that:
 - The ingestion path deletes old chunks per source before upserting, so rerunning the script is safe.
 - Ingestion writes vectors in small batches to avoid long PostgreSQL transactions during local setup.
 - The UI stores the current thread locally so the same Mastra memory thread continues across refreshes.
+- Assistant responses are rendered with `react-markdown` and `remark-gfm` so model output can use standard Markdown plus GitHub Flavored Markdown tables.
 
 ## Known Requirements Before It Will Run End-to-End
 
