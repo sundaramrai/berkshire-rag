@@ -54,7 +54,3 @@ export function persistChatSession(session: StoredChatSession) {
 
   globalThis.window.localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(session));
 }
-
-export function resetStoredChatSession(session: StoredChatSession) {
-  persistChatSession(session);
-}
