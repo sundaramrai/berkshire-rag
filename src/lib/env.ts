@@ -7,9 +7,6 @@ const envSchema = z.object({
     .min(1, "POSTGRES_CONNECTION_STRING is required."),
 });
 
-const DEFAULT_POSTGRES_CONNECTION_STRING =
-  "postgresql://postgres:postgres@localhost:5432/berkshire";
-
 export function getRequiredEnv() {
   return envSchema.parse({
     MISTRAL_API_KEY: process.env.MISTRAL_API_KEY,
@@ -18,5 +15,5 @@ export function getRequiredEnv() {
 }
 
 export function getPostgresConnectionString() {
-  return process.env.POSTGRES_CONNECTION_STRING ?? DEFAULT_POSTGRES_CONNECTION_STRING;
+  return getRequiredEnv().POSTGRES_CONNECTION_STRING;
 }
