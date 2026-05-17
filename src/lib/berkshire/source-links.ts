@@ -1,4 +1,4 @@
-export const BERKSHIRE_LETTER_SOURCE_LINKS: Record<string, string> = {
+const BERKSHIRE_LETTER_SOURCE_LINKS: Record<string, string> = {
   "1977": "https://drive.google.com/file/d/1mIlS3ZJs38X1ShTK8iRzSg8QYKVLcAlq/view",
   "1978": "https://drive.google.com/file/d/1_nmwe0-y-eB2gtuWeyFAx-a7q064aJDm/view",
   "1979": "https://drive.google.com/file/d/1vHlkQzIKEo4Cgocd49Tc-7REGaWTFyOg/view",
