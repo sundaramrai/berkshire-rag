@@ -17,11 +17,18 @@ export const mastra = new Mastra({
     [BERKSHIRE_VECTOR_STORE_NAME]: new PgVector({
       id: BERKSHIRE_INDEX_TABLE_ID,
       connectionString: getPostgresConnectionString(),
+      pgPoolOptions: {
+        connectionTimeoutMillis: 30000,
+        idleTimeoutMillis: 30000,
+        max: 1,
+      },
     }),
   },
   storage: new PostgresStore({
     id: "berkshire-memory",
     connectionString: getPostgresConnectionString(),
+    idleTimeoutMillis: 30000,
+    max: 1,
   }),
   logger: new PinoLogger({
     name: "BerkshireMastra",
