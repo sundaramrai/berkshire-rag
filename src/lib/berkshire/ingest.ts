@@ -44,8 +44,9 @@ export function listShareholderLetterFiles(): ShareholderLetterFile[] {
     })
     .sort((left, right) => left.year.localeCompare(right.year));
 
+  const availableYears = new Set(files.map((file) => file.year));
   const missingYears = REQUIRED_LETTER_YEARS.filter(
-    (year) => !files.some((file) => file.year === year),
+    (year) => !availableYears.has(year),
   );
 
   if (missingYears.length > 0) {
@@ -93,6 +94,7 @@ export async function ingestShareholderLetters({
       });
 
       console.log(`  ${chunks.length} chunks generated.`);
+      const totalBatches = Math.ceil(chunks.length / INGEST_BATCH_SIZE);
 
       await vectorStore.deleteVectors({
         indexName: BERKSHIRE_VECTOR_INDEX_NAME,
@@ -104,7 +106,6 @@ export async function ingestShareholderLetters({
       for (let start = 0; start < chunks.length; start += INGEST_BATCH_SIZE) {
         const chunkBatch = chunks.slice(start, start + INGEST_BATCH_SIZE);
         const batchNumber = Math.floor(start / INGEST_BATCH_SIZE) + 1;
-        const totalBatches = Math.ceil(chunks.length / INGEST_BATCH_SIZE);
 
         console.log(
           `  Embedding batch ${batchNumber}/${totalBatches} (${chunkBatch.length} chunks)...`,
