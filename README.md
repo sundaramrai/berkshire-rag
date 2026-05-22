@@ -1,6 +1,6 @@
 # Berkshire Hathaway Intelligence
 
-A clean, modular RAG application built for the Pazago Mastra assignment. It answers questions about Warren Buffett's investment philosophy using Berkshire Hathaway shareholder letters from 1977 through 2024.
+A clean, modular RAG application that answers questions about Warren Buffett's investment philosophy using Berkshire Hathaway shareholder letters from 1977 through 2024.
 
 ## Live Links
 
@@ -269,22 +269,15 @@ Or connect the GitHub repository to Vercel and configure the same environment va
 
 Mastra memory is stored in PostgreSQL, so the same hosted database persists both vectors and conversation state in production.
 
-## Testing Checklist
+## Example Queries
 
-Use these prompts in both Mastra Studio and the frontend:
+Try these in Mastra Studio or the frontend to explore the app:
 
 - `What is Warren Buffett's investment philosophy?`
 - `Can you elaborate on Buffett's views about diversification?`
 - `How has Berkshire's acquisition strategy evolved over time?`
 - `What companies did Berkshire acquire in 2023?`
 - `What does Buffett say about market volatility and timing?`
-
-Verify that:
-
-- answers cite the relevant year
-- the agent uses earlier context for follow-up questions
-- clickable source chips appear in the frontend
-- retrieval remains grounded in the letters
 
 ## Notes on Design Choices
 
