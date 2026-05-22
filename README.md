@@ -1,12 +1,13 @@
 # Berkshire Hathaway Intelligence
 
-A clean, modular RAG application that answers questions about Warren Buffett's investment philosophy using Berkshire Hathaway shareholder letters from 1977 through 2024.
+A RAG application that answers questions about Warren Buffett's investment philosophy using Berkshire Hathaway shareholder letters from 1977 through 2024.
 
 ## Live Links
 
 - Web app: <https://berkshire-rag.vercel.app/>
-- Mastra Studio agents: <https://berkshire-rag-assignment.studio.mastra.cloud/agents>
-- Mastra Studio Berkshire agent chat: <https://berkshire-rag-assignment.studio.mastra.cloud/agents/berkshire-intelligence-agent/chat/new>
+- Mastra Studio: <https://sundaramrai-berkshire-rag.studio.mastra.cloud/agents>
+- Mastra Server: <https://sundaramrai-berkshire-rag.server.mastra.cloud>
+- Berkshire agent chat: <https://sundaramrai-berkshire-rag.studio.mastra.cloud/agents/berkshire-intelligence-agent/chat/new>
 
 ## Tech Stack
 
@@ -159,11 +160,6 @@ npm run dev:studio
 ```
 
 Mastra Studio runs at `http://localhost:4111`.
-
-Deployed Mastra Studio:
-
-- Agents: <https://berkshire-rag-assignment.studio.mastra.cloud/agents>
-- Berkshire agent chat: <https://berkshire-rag-assignment.studio.mastra.cloud/agents/berkshire-intelligence-agent/chat/new>
 
 Terminal 2:
 
