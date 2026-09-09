@@ -7,6 +7,10 @@ import { berkshireAgent } from "./agents/berkshire-agent";
 import { ingestShareholderLettersWorkflow } from "./workflows/ingest-shareholder-letters-workflow";
 
 export const mastra = new Mastra({
+  // This application has no cron workflows or Mastra background tasks. Disabling
+  // automatic workers prevents the scheduler from polling `mastra_schedules`
+  // every 10 seconds in each serverless instance.
+  workers: false,
   agents: {
     berkshireAgent,
   },
